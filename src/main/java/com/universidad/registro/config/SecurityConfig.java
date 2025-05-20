@@ -2,6 +2,7 @@ package com.universidad.registro.config;
 
 import com.universidad.registro.security.JwtAuthenticationEntryPoint;
 import com.universidad.registro.security.JwtAuthenticationFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,9 +31,14 @@ public class SecurityConfig {
      * Se utiliza para devolver una respuesta adecuada cuando un usuario no autenticado intenta acceder a un recurso protegido.
      */
     private final JwtAuthenticationEntryPoint unauthorizedHandler;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(JwtAuthenticationEntryPoint unauthorizedHandler) {
+
+    @Autowired
+    public SecurityConfig(JwtAuthenticationEntryPoint unauthorizedHandler,
+                          JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.unauthorizedHandler = unauthorizedHandler;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
     /**
@@ -58,8 +64,9 @@ public class SecurityConfig {
      * Este bean se encarga de gestionar la autenticación mediante JWT (JSON Web Token).
      * Se utiliza para validar y procesar los tokens JWT en las solicitudes de los usuarios.
      */
-    @Bean
+    @Autowired
     public JwtAuthenticationFilter jwtAuthenticationFilter() {
+
         return new JwtAuthenticationFilter();
     }
 
@@ -70,20 +77,28 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .cors(cors -> cors.disable())
-            .csrf(csrf -> csrf.disable())
-            .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**", "/api/public/**", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/docentes/**").hasAnyRole("ADMIN", "DOCENTE")
-                .requestMatchers("/api/estudiantes/**").hasAnyRole("ADMIN", "DOCENTE", "ESTUDIANTE")
-                .anyRequest().authenticated()
-            );
+                .cors(cors -> cors.disable())
+                .csrf(csrf -> csrf.disable())
+                .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/api/auth/**",
+                                "/api/public/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/swagger-resources/**",
+                                "/webjars/**"
+                        ).permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/docentes/**").hasAnyRole("ADMIN", "DOCENTE")
+                        .requestMatchers("/api/estudiantes/**").hasAnyRole("ADMIN", "DOCENTE", "ESTUDIANTE")
+                        .anyRequest().authenticated()
+                );
 
         // Usar el bean jwtAuthenticationFilter directamente
-        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

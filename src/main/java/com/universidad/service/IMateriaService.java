@@ -11,4 +11,6 @@ public interface IMateriaService {
     MateriaDTO crearMateria(MateriaDTO materia);
     MateriaDTO actualizarMateria(Long id, MateriaDTO materia);
     void eliminarMateria(Long id);
+    void asignarDocente(Long materiaId, Long docenteId);
+    void desasignarDocente(Long materiaId, Long docenteId);
 }

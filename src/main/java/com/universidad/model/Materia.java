@@ -1,6 +1,7 @@
 package com.universidad.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Set;
 
 @Getter // Genera un getter para todos los campos de la clase
 @Setter // Genera un setter para todos los campos de la clase
@@ -36,14 +38,21 @@ public class Materia implements Serializable {
     // El ID de la materia es generado automáticamente por la base de datos
     private Long id;
 
+    @NotBlank(message = "El nombre de la materia es obligatorio")
+    @Size(min = 3, max = 100, message = "El nombre de la materia debe tener entre 3 y 100 caracteres")
     @Column(name = "nombre_materia", nullable = false, length = 100) // Columna no nula con longitud máxima de 100 caracteres
     // El nombre de la materia no puede ser nulo y tiene una longitud máxima de 100 caracteres
     private String nombreMateria;
 
+    @NotBlank(message = "El código único es obligatorio")
+    @Size(min = 3, max = 20, message = "El código único debe tener entre 3 y 20 caracteres")
     @Column(name = "codigo_unico", nullable = false, unique = true) // Columna no nula y con valor único
     // El código único de la materia no puede ser nulo y debe ser único en la base de datos
     private String codigoUnico;
 
+    @NotNull(message = "Los créditos son obligatorios")
+    @Min(value = 1, message = "La materia debe tener al menos 1 crédito")
+    @Max(value = 10, message = "La materia no puede tener más de 10 créditos")
     @Column(name = "creditos", nullable = false) // Columna no nula
     // El número de créditos de la materia no puede ser nulo
     private Integer creditos;
@@ -51,6 +60,10 @@ public class Materia implements Serializable {
     @Version // Anotación para manejar la versión de la entidad
     private Long version; // Campo para manejar la versión de la entidad, útil para el control de concurrencia
 
+
+    // Relación ManyToMany con Docente
+    @ManyToMany(mappedBy = "materias")
+    private Set<Docente> docentes;
     /**
      * Lista de materias que son prerequisitos para esta materia.
      */

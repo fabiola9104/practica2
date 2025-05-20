@@ -9,6 +9,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -25,6 +26,7 @@ import java.io.IOException;
 
 // Este filtro se encarga de interceptar las solicitudes HTTP y verificar si contienen un token JWT válido en el encabezado de autorización.
 // Si el token es válido, se establece la autenticación del usuario en el contexto de seguridad de Spring.
+@Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // Inyecta las dependencias necesarias para la autenticación JWT
@@ -40,6 +42,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // Utiliza SLF4J para registrar mensajes de información y errors
     // en la consola o en un archivo de registro, según la configuración del logger
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String path = request.getServletPath();
+        return path.startsWith("/v3/api-docs")
+                || path.startsWith("/swagger-ui")
+                || path.startsWith("/swagger-ui.html")
+                || path.startsWith("/swagger-resources")
+                || path.startsWith("/webjars")
+                || path.startsWith("/api/auth")
+                || path.startsWith("/api/public");
+    }
+
 
     // Método que se ejecuta para cada solicitud HTTP
     // Este método se encarga de verificar el token JWT y establecer la autenticación del usuario en el contexto de seguridad
@@ -71,6 +86,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // Continúa con la cadena de filtros para que la solicitud sea procesada por el siguiente filtro o controlador
         // en la cadena de filtros de Spring Security
         filterChain.doFilter(request, response);
+        System.out.println("JwtAuthenticationFilter ejecutado en: " + request.getServletPath());
+
     }
 
     // Método para extraer el token JWT del encabezado de autorización de la solicitud HTTP

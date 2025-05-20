@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
+import java.util.Set;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
@@ -28,4 +29,15 @@ public class Docente extends Persona {
      */
     @OneToMany(mappedBy = "docente", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<EvaluacionDocente> evaluaciones; // Lista de evaluaciones asociadas al docente
+
+    @ManyToMany
+    @JoinTable(
+            name = "docente_materia",
+            joinColumns = @JoinColumn(name = "docente_id"),
+            inverseJoinColumns = @JoinColumn(name = "materia_id")
+    )
+    /**
+     * Lista de materias asociadas al docente.
+     */
+    private Set<Materia> materias;
 }

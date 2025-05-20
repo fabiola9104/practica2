@@ -1,9 +1,12 @@
 package com.universidad.service.impl;
 
+import com.universidad.model.Docente;
 import com.universidad.model.Materia;
+import com.universidad.repository.DocenteRepository;
 import com.universidad.repository.MateriaRepository;
 import com.universidad.service.IMateriaService;
 import com.universidad.dto.MateriaDTO;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -18,6 +21,8 @@ public class MateriaServiceImpl implements IMateriaService {
 
     @Autowired
     private MateriaRepository materiaRepository;
+    @Autowired
+    private DocenteRepository docenteRepository;
 
     // Método utilitario para mapear Materia a MateriaDTO
     private MateriaDTO mapToDTO(Materia materia) {
@@ -83,5 +88,23 @@ public class MateriaServiceImpl implements IMateriaService {
     @CacheEvict(value = {"materia", "materias"}, allEntries = true)
     public void eliminarMateria(Long id) {
         materiaRepository.deleteById(id);
+    }
+
+    @Override
+    public void asignarDocente(Long materiaId, Long docenteId) {
+        Materia materia = materiaRepository.findById(materiaId).orElseThrow(() -> new EntityNotFoundException("Materia not found"));
+        Docente docente = docenteRepository.findById(docenteId).orElseThrow(() -> new EntityNotFoundException("Docente not found"));
+        materia.getDocentes().add(docente);
+        docente.getMaterias().add(materia);
+        materiaRepository.save(materia);
+    }
+
+    @Override
+    public void desasignarDocente(Long materiaId, Long docenteId) {
+        Materia materia = materiaRepository.findById(materiaId).orElseThrow(() -> new EntityNotFoundException("Materia not found"));
+        Docente docente = docenteRepository.findById(docenteId).orElseThrow(() -> new EntityNotFoundException("Docente not found"));
+        materia.getDocentes().remove(docente);
+        docente.getMaterias().remove(materia);
+        materiaRepository.save(materia);
     }
 }

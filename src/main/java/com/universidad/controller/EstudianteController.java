@@ -15,13 +15,16 @@ import org.springframework.http.HttpStatus; // Importa la clase HttpStatus de Sp
 import org.springframework.web.bind.annotation.*; // Importa las anotaciones de Spring para controladores web
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.Operation;
 
 import java.util.List; // Importa la interfaz List para manejar listas
 
 @RestController // Anotación que indica que esta clase es un controlador REST de Spring
 @RequestMapping("/api/estudiantes") // Define la ruta base para las solicitudes HTTP a este controlador
+@Tag(name = "Estudiantes", description = "Controlador para gestionar estudiantes") // Anotación para documentar el controlador
 @Validated
-public class EstudianteController { // Define la clase EstudianteController
+public class  EstudianteController { // Define la clase EstudianteController
 
     private final IEstudianteService estudianteService; // Declara una variable final para el servicio de estudiantes
     private static final Logger logger = LoggerFactory.getLogger(EstudianteController.class);
@@ -32,6 +35,7 @@ public class EstudianteController { // Define la clase EstudianteController
     }
 
     @GetMapping // Anotación que indica que este método maneja solicitudes GET
+    @Operation(summary = "Obtener todos los estudiantes", description = "Devuelve una lista de todos los estudiantes") // Anotación para documentar el método
     public ResponseEntity<List<EstudianteDTO>> obtenerTodosLosEstudiantes() { // Método para obtener una lista de todos los EstudianteDTO
         long inicio = System.currentTimeMillis();
         logger.info("[ESTUDIANTE] Inicio obtenerTodosLosEstudiantes: {}", inicio);
@@ -42,6 +46,7 @@ public class EstudianteController { // Define la clase EstudianteController
     }
 
     @GetMapping("/inscripcion/{numeroInscripcion}") // Anotación que indica que este método maneja solicitudes GET con un parámetro de ruta
+    @Operation(summary = "Obtener estudiante por número de inscripción", description = "Devuelve un estudiante específico por su número de inscripción") // Anotación para documentar el método
     public ResponseEntity<EstudianteDTO> obtenerEstudiantePorNumeroInscripcion(
         @PathVariable String numeroInscripcion) { // Método para obtener un estudiante por su número de inscripción
         long inicio = System.currentTimeMillis();
@@ -53,6 +58,7 @@ public class EstudianteController { // Define la clase EstudianteController
     }
 
     @GetMapping("/{id}/materias")
+    @Operation(summary = "Obtener materias de estudiante", description = "Devuelve una lista de materias asociadas a un estudiante específico") // Anotación para documentar el método
     public ResponseEntity<List<Materia>> obtenerMateriasDeEstudiante(
         @PathVariable("id") Long estudianteId) {
         List<Materia> materias = estudianteService.obtenerMateriasDeEstudiante(estudianteId);
@@ -60,6 +66,7 @@ public class EstudianteController { // Define la clase EstudianteController
     }
 
     @GetMapping("/{id}/lock")
+    @Operation(summary = "Obtener estudiante con bloqueo", description = "Devuelve un estudiante específico con bloqueo") // Anotación para documentar el método
     public ResponseEntity<Estudiante> getEstudianteConBloqueo(
         @PathVariable Long id) {
         Estudiante estudiante = estudianteService.obtenerEstudianteConBloqueo(id);
@@ -67,6 +74,7 @@ public class EstudianteController { // Define la clase EstudianteController
     }
 
     @PostMapping // Anotación que indica que este método maneja solicitudes POST
+    @Operation(summary = "Crear nuevo estudiante", description = "Crea un nuevo estudiante y devuelve el objeto creado") // Anotación para documentar el método
     @Transactional // Anotación que indica que este método debe ejecutarse dentro de una transacción
     @ResponseStatus(HttpStatus.CREATED) // Anotación que indica que la respuesta HTTP debe tener un estado 201 Created
     public ResponseEntity<EstudianteDTO> crearEstudiante(@Valid @RequestBody EstudianteDTO estudianteDTO) { // Método para crear un nuevo estudiante
@@ -75,6 +83,7 @@ public class EstudianteController { // Define la clase EstudianteController
     }
 
     @PutMapping("/{id}") // Anotación que indica que este método maneja solicitudes PUT con un parámetro de ruta
+    @Operation(summary = "Actualizar estudiante", description = "Actualiza un estudiante existente y devuelve el objeto actualizado") // Anotación para documentar el método
     @Transactional // Anotación que indica que este método debe ejecutarse dentro de una transacción
     @ResponseStatus(HttpStatus.OK) // Anotación que indica que la respuesta HTTP debe tener un estado 200 OK    
     public ResponseEntity<EstudianteDTO> actualizarEstudiante(
@@ -85,6 +94,7 @@ public class EstudianteController { // Define la clase EstudianteController
     }
 
     @PutMapping("/{id}/baja") // Anotación que indica que este método maneja solicitudes PUT para dar de baja un estudiante
+    @Operation(summary = "Eliminar estudiante", description = "Elimina un estudiante existente y devuelve el objeto eliminado") // Anotación para documentar el método
     @Transactional // Anotación que indica que este método debe ejecutarse dentro de una transacción
     @ResponseStatus(HttpStatus.OK) // Anotación que indica que la respuesta HTTP debe tener un estado 200 OK
     public ResponseEntity<EstudianteDTO> eliminarEstudiante(
@@ -95,6 +105,7 @@ public class EstudianteController { // Define la clase EstudianteController
     }
 
     @GetMapping("/activos") // Anotación que indica que este método maneja solicitudes GET a la ruta /activos
+    @Operation(summary = "Obtener estudiantes activos", description = "Devuelve una lista de estudiantes activos") // Anotación para documentar el método
     public ResponseEntity<List<EstudianteDTO>> obtenerEstudianteActivo() { // Método para obtener una lista de estudiantes activos
         List<EstudianteDTO> estudiantesActivos = estudianteService.obtenerEstudianteActivo(); // Llama al servicio para obtener los estudiantes activos
         return ResponseEntity.ok(estudiantesActivos); // Retorna una respuesta HTTP 200 OK con la lista de estudiantes activos

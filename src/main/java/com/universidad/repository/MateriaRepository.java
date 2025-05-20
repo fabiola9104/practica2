@@ -9,6 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface MateriaRepository extends JpaRepository<Materia, Long> {
+    boolean existsByCodigoUnico(String codigoUnico);
     Materia findByCodigoUnico(String codigoUnico);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE) // Bloqueo pesimista para evitar condiciones de carrera

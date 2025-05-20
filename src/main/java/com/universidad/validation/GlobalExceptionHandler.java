@@ -141,17 +141,20 @@ public class GlobalExceptionHandler {
     // 7. Manejador global para cualquier otra excepción no controlada
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGenericException(Exception ex, WebRequest request) {
-        // En producción, podrías querer loggear la excepción pero no mostrarla al cliente
+        // NO interceptar los errores de Springdoc (Swagger)
+        String path = request.getDescription(false);
+        if (path != null && path.contains("/v3/api-docs")) {
+            // Deja que Spring maneje este error normalmente (Swagger lo necesita)
+            throw new RuntimeException(ex);
+        }
+
         ApiError apiError = new ApiError(
-            HttpStatus.INTERNAL_SERVER_ERROR.value(),
-            "Error interno del servidor",
-            "Ocurrió un error inesperado. Por favor contacte al administrador si el problema persiste.",
-            LocalDateTime.now()
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Error interno del servidor",
+                "Ocurrió un error inesperado. Por favor contacte al administrador si el problema persiste.",
+                LocalDateTime.now()
         );
-        
-        // Log detallado para depuración
         ex.printStackTrace();
-        
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiError);
     }
 
